@@ -17,6 +17,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInst, _In_ L
 	MainHandler handler;
 	mainWindow.SetHandler(static_cast <Application::EventHandler*> (&handler));
 
+	g_scene.AddCuboid("Cube", 4.0f, 4.0f, 4.0f);
+	g_scene.AddPolygon("Disk", 2.0f);
+	g_scene.AddSphere("Sphere", 2.0f);
+	g_scene.GetMesh(0)->pMesh->Translate({ 5.0f, 0.0f, 0.0f });
+	g_scene.GetMesh(1)->pMesh->Translate({ -5.0f, 0.0f, 0.0f });
+	g_scene.GetMesh(2)->pMesh->Translate({ 0.0f, 5.0f, 0.0f });
+
 	// plotting
 	g_scene.AddPlane("plane", 4.0f, 4.0f, 128, 128, DX::SHADING::SMOOTH);
 	g_scene.DisplacePlane(0,

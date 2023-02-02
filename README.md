@@ -1,6 +1,9 @@
 # DXPlot
 #### Graph Plotter Built entirely using DirectX 11
 
+## Images
+![](/screenshots/ss_1.png)
+
 ## Features
 - Create and Modify Primitve Geometry
 - Graph Plotting

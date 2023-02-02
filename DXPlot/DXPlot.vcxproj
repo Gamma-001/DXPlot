@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Device\Keyboard.hpp" />
+    <ClInclude Include="..\include\Device\Mouse.hpp" />
+    <ClInclude Include="..\include\DXPlot.hpp" />
+    <ClInclude Include="..\include\Engine.hpp" />
+    <ClInclude Include="..\include\extern\assimp\aabb.h" />
+    <ClInclude Include="..\include\extern\assimp\ai_assert.h" />
+    <ClInclude Include="..\include\extern\assimp\anim.h" />
+    <ClInclude Include="..\include\extern\assimp\Base64.hpp" />
+    <ClInclude Include="..\include\extern\assimp\BaseImporter.h" />
+    <ClInclude Include="..\include\extern\assimp\Bitmap.h" />
+    <ClInclude Include="..\include\extern\assimp\BlobIOSystem.h" />
+    <ClInclude Include="..\include\extern\assimp\ByteSwapper.h" />
+    <ClInclude Include="..\include\extern\assimp\camera.h" />
+    <ClInclude Include="..\include\extern\assimp\cexport.h" />
+    <ClInclude Include="..\include\extern\assimp\cfileio.h" />
+    <ClInclude Include="..\include\extern\assimp\cimport.h" />
+    <ClInclude Include="..\include\extern\assimp\ColladaMetaData.h" />
+    <ClInclude Include="..\include\extern\assimp\color4.h" />
+    <ClInclude Include="..\include\extern\assimp\commonMetaData.h" />
+    <ClInclude Include="..\include\extern\assimp\config.h" />
+    <ClInclude Include="..\include\extern\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="..\include\extern\assimp\DefaultIOStream.h" />
+    <ClInclude Include="..\include\extern\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="..\include\extern\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="..\include\extern\assimp\defs.h" />
+    <ClInclude Include="..\include\extern\assimp\Exceptional.h" />
+    <ClInclude Include="..\include\extern\assimp\Exporter.hpp" />
+    <ClInclude Include="..\include\extern\assimp\fast_atof.h" />
+    <ClInclude Include="..\include\extern\assimp\GenericProperty.h" />
+    <ClInclude Include="..\include\extern\assimp\GltfMaterial.h" />
+    <ClInclude Include="..\include\extern\assimp\Hash.h" />
+    <ClInclude Include="..\include\extern\assimp\Importer.hpp" />
+    <ClInclude Include="..\include\extern\assimp\importerdesc.h" />
+    <ClInclude Include="..\include\extern\assimp\IOStream.hpp" />
+    <ClInclude Include="..\include\extern\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="..\include\extern\assimp\IOSystem.hpp" />
+    <ClInclude Include="..\include\extern\assimp\light.h" />
+    <ClInclude Include="..\include\extern\assimp\LineSplitter.h" />
+    <ClInclude Include="..\include\extern\assimp\LogAux.h" />
+    <ClInclude Include="..\include\extern\assimp\Logger.hpp" />
+    <ClInclude Include="..\include\extern\assimp\LogStream.hpp" />
+    <ClInclude Include="..\include\extern\assimp\material.h" />
+    <ClInclude Include="..\include\extern\assimp\MathFunctions.h" />
+    <ClInclude Include="..\include\extern\assimp\matrix3x3.h" />
+    <ClInclude Include="..\include\extern\assimp\matrix4x4.h" />
+    <ClInclude Include="..\include\extern\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="..\include\extern\assimp\mesh.h" />
+    <ClInclude Include="..\include\extern\assimp\metadata.h" />
+    <ClInclude Include="..\include\extern\assimp\NullLogger.hpp" />
+    <ClInclude Include="..\include\extern\assimp\ObjMaterial.h" />
+    <ClInclude Include="..\include\extern\assimp\ParsingUtils.h" />
+    <ClInclude Include="..\include\extern\assimp\pbrmaterial.h" />
+    <ClInclude Include="..\include\extern\assimp\postprocess.h" />
+    <ClInclude Include="..\include\extern\assimp\Profiler.h" />
+    <ClInclude Include="..\include\extern\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="..\include\extern\assimp\qnan.h" />
+    <ClInclude Include="..\include\extern\assimp\quaternion.h" />
+    <ClInclude Include="..\include\extern\assimp\RemoveComments.h" />
+    <ClInclude Include="..\include\extern\assimp\scene.h" />
+    <ClInclude Include="..\include\extern\assimp\SceneCombiner.h" />
+    <ClInclude Include="..\include\extern\assimp\SGSpatialSort.h" />
+    <ClInclude Include="..\include\extern\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="..\include\extern\assimp\SmallVector.h" />
+    <ClInclude Include="..\include\extern\assimp\SmoothingGroups.h" />
+    <ClInclude Include="..\include\extern\assimp\SpatialSort.h" />
+    <ClInclude Include="..\include\extern\assimp\StandardShapes.h" />
+    <ClInclude Include="..\include\extern\assimp\StreamReader.h" />
+    <ClInclude Include="..\include\extern\assimp\StreamWriter.h" />
+    <ClInclude Include="..\include\extern\assimp\StringComparison.h" />
+    <ClInclude Include="..\include\extern\assimp\StringUtils.h" />
+    <ClInclude Include="..\include\extern\assimp\Subdivision.h" />
+    <ClInclude Include="..\include\extern\assimp\texture.h" />
+    <ClInclude Include="..\include\extern\assimp\TinyFormatter.h" />
+    <ClInclude Include="..\include\extern\assimp\types.h" />
+    <ClInclude Include="..\include\extern\assimp\vector2.h" />
+    <ClInclude Include="..\include\extern\assimp\vector3.h" />
+    <ClInclude Include="..\include\extern\assimp\version.h" />
+    <ClInclude Include="..\include\extern\assimp\Vertex.h" />
+    <ClInclude Include="..\include\extern\assimp\XmlParser.h" />
+    <ClInclude Include="..\include\extern\assimp\XMLTools.h" />
+    <ClInclude Include="..\include\extern\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="..\include\extern\imgui\imconfig.h" />
+    <ClInclude Include="..\include\extern\imgui\imgui.h" />
+    <ClInclude Include="..\include\extern\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\include\extern\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\include\extern\imgui\imgui_internal.h" />
+    <ClInclude Include="..\include\extern\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\include\extern\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\include\extern\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\include\Object\Camera.hpp" />
+    <ClInclude Include="..\include\Object\Empty.hpp" />
+    <ClInclude Include="..\include\Object\Mesh.hpp" />
+    <ClInclude Include="..\include\Resource\ComputeShader.hpp" />
+    <ClInclude Include="..\include\Resource\DeviceResources.hpp" />
+    <ClInclude Include="..\include\Resource\Shader.hpp" />
+    <ClInclude Include="..\include\Resource\Texture.hpp" />
+    <ClInclude Include="..\include\Transform.hpp" />
+    <ClInclude Include="..\include\util.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Device\Keyboard.cpp" />
+    <ClCompile Include="Device\Mouse.cpp" />
+    <ClCompile Include="DXPlot.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="extern\imgui\imgui.cpp" />
+    <ClCompile Include="extern\imgui\imgui_demo.cpp" />
+    <ClCompile Include="extern\imgui\imgui_draw.cpp" />
+    <ClCompile Include="extern\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="extern\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="extern\imgui\imgui_tables.cpp" />
+    <ClCompile Include="extern\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Object\Camera.cpp" />
+    <ClCompile Include="Object\Empty.cpp" />
+    <ClCompile Include="Object\Mesh.cpp" />
+    <ClCompile Include="Resource\ComputeShader.cpp" />
+    <ClCompile Include="Resource\DeviceResources.cpp" />
+    <ClCompile Include="Resource\Shader.cpp" />
+    <ClCompile Include="Resource\Texture.cpp" />
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\extern\assimp\.editorconfig" />
+    <None Include="..\include\extern\assimp\color4.inl" />
+    <None Include="..\include\extern\assimp\config.h.in" />
+    <None Include="..\include\extern\assimp\material.inl" />
+    <None Include="..\include\extern\assimp\matrix3x3.inl" />
+    <None Include="..\include\extern\assimp\matrix4x4.inl" />
+    <None Include="..\include\extern\assimp\quaternion.inl" />
+    <None Include="..\include\extern\assimp\SmoothingGroups.inl" />
+    <None Include="..\include\extern\assimp\vector2.inl" />
+    <None Include="..\include\extern\assimp\vector3.inl" />
+    <None Include="..\shaders\axisGridShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\shaders\defLitShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\shaders\flatColorShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{66d688ed-9379-47e9-90cb-58dbfb088101}</ProjectGuid>
+    <RootNamespace>DX111</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>DXPlot</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\VS Projects\winAPI\DX11_1\include\extern;D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\VS Projects\winAPI\DX11_1\libs\assimp;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\VS Projects\winAPI\DX11_1\include\extern;D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\VS Projects\winAPI\DX11_1\libs\assimp;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc142-mt.lib;d3dcompiler.lib;d3d11.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp-vc142-mt.lib;d3dcompiler.lib;d3d11.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

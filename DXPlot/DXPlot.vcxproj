@@ -233,13 +233,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\VS Projects\winAPI\DX11_1\include\extern;D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\VS Projects\winAPI\DX11_1\libs\assimp;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include\extern\;$(SolutionDir)include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)libs\assimp\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\VS Projects\winAPI\DX11_1\include\extern;D:\VS Projects\winAPI\DX11_1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\VS Projects\winAPI\DX11_1\libs\assimp;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include\extern\;$(SolutionDir)include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)libs\assimp\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -284,6 +284,12 @@
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -304,6 +310,12 @@
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

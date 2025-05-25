@@ -4,11 +4,13 @@
 #include <sdkddkver.h>
 #include <dxgi.h>
 
-Microsoft::WRL::ComPtr <IDXGIFactory1> DX::DeviceResources::s_factory = nullptr;
+using namespace Cass;
+
+Microsoft::WRL::ComPtr <IDXGIFactory1> DeviceResources::s_factory = nullptr;
 
 // public methods
 
-DX::DeviceResources::DeviceResources(
+DeviceResources::DeviceResources(
 	DXGI_FORMAT _backBufferFormat,
 	DXGI_FORMAT _depthBufferFormat,
 	UINT _backBufferCount,
@@ -27,9 +29,9 @@ DX::DeviceResources::DeviceResources(
 	ZeroMemory(&m_viewport, sizeof(m_viewport));
 }
 
-DX::DeviceResources::~DeviceResources() { }
+DeviceResources::~DeviceResources() { }
 
-void DX::DeviceResources::CreateDeviceResource(UINT creationFlags) {
+void DeviceResources::CreateDeviceResource(UINT creationFlags) {
 #if defined _DEBUG
 	creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -54,7 +56,7 @@ void DX::DeviceResources::CreateDeviceResource(UINT creationFlags) {
 		throw std::out_of_range("minFeatureLevel too high");
 	}
 	
-	HRESULT hr = E_FAIL;
+	HRESULT hr = S_OK;
 	hr = D3D11CreateDevice(
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
@@ -83,7 +85,7 @@ void DX::DeviceResources::CreateDeviceResource(UINT creationFlags) {
 	CreateStates();
 }
 
-void DX::DeviceResources::CreateSizeDependentResource() {
+void DeviceResources::CreateSizeDependentResource() {
 	if (!m_window) {
 		throw std::exception("window handle not set");
 	}
@@ -171,7 +173,7 @@ void DX::DeviceResources::CreateSizeDependentResource() {
 		CreateRenderTargets_msaa();
 }
 
-void DX::DeviceResources::SetRenderTarget_no_msaa(bool _culling, bool _depthEnable) {
+void DeviceResources::SetRenderTarget_no_msaa(bool _culling, bool _depthEnable) {
 	if (_culling) m_context->RSSetState(m_RS_no_msaa.Get());
 	else m_context->RSSetState(m_RS_no_msaa_no_cull.Get());
 
@@ -180,7 +182,7 @@ void DX::DeviceResources::SetRenderTarget_no_msaa(bool _culling, bool _depthEnab
 	m_context->OMSetBlendState(m_blendState.Get(), NULL, 0xffffffff);
 }
 
-void DX::DeviceResources::SetRenderTarget_msaa(bool _culling, bool _depthEnable, bool _lineAA) {
+void DeviceResources::SetRenderTarget_msaa(bool _culling, bool _depthEnable, bool _lineAA) {
 	if (!m_msaaEnabled) return;
 
 	if (_lineAA) m_context->RSSetState(m_RS_msaa_lineAA.Get());
@@ -192,11 +194,11 @@ void DX::DeviceResources::SetRenderTarget_msaa(bool _culling, bool _depthEnable,
 	m_context->OMSetBlendState(m_blendState.Get(), NULL, 0xffffffff);
 }
 
-void DX::DeviceResources::SetViewport() {
+void DeviceResources::SetViewport() {
 	m_context->RSSetViewports(1, &m_viewport);
 }
 
-void DX::DeviceResources::Clear(const float _clearColor[4]) {
+void DeviceResources::Clear(const float _clearColor[4]) {
 	m_context->ClearRenderTargetView(m_RTV.Get(), _clearColor);
 	m_context->ClearDepthStencilView(m_DSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0U);
 
@@ -206,18 +208,18 @@ void DX::DeviceResources::Clear(const float _clearColor[4]) {
 	}
 }
 
-void DX::DeviceResources::Resolve() {
+void DeviceResources::Resolve() {
 	m_context->ResolveSubresource(m_renderTarget.Get(), 0, m_renderTarget_msaa.Get(), 0, m_backBufferFormat);
 }
 
-void DX::DeviceResources::SetWindow(HWND _hWnd, int _width, int _height) {
+void DeviceResources::SetWindow(HWND _hWnd, int _width, int _height) {
 	m_window = _hWnd;
 	m_windowSize.left = m_windowSize.top = 0;
 	m_windowSize.right = _width;
 	m_windowSize.bottom = _height;
 }
 
-void DX::DeviceResources::WindowSizeChanged(int _width, int _height) {
+void DeviceResources::WindowSizeChanged(int _width, int _height) {
 	m_windowSize.left = m_windowSize.top = 0;
 	m_windowSize.right = _width;
 	m_windowSize.bottom = _height;
@@ -225,7 +227,7 @@ void DX::DeviceResources::WindowSizeChanged(int _width, int _height) {
 	CreateSizeDependentResource();
 }
 
-HRESULT DX::DeviceResources::CreateTexture2D(_In_ UINT _width, _In_ UINT _height, _In_ DXGI_FORMAT _format, _In_ UINT _bindFlags, _Out_ ID3D11Texture2D*& _texture) {
+HRESULT DeviceResources::CreateTexture2D(_In_ UINT _width, _In_ UINT _height, _In_ DXGI_FORMAT _format, _In_ UINT _bindFlags, _Out_ ID3D11Texture2D*& _texture) {
 	if (!_width || !_height)
 		throw std::invalid_argument("height or width can't be 0");
 
@@ -246,7 +248,7 @@ HRESULT DX::DeviceResources::CreateTexture2D(_In_ UINT _width, _In_ UINT _height
 // private methods
 //
 
-void DX::DeviceResources::CreateStates() {
+void DeviceResources::CreateStates() {
 	if (!m_device) {
 		throw std::exception("Device not set or destroyed");
 	}
@@ -328,7 +330,7 @@ void DX::DeviceResources::CreateStates() {
 	ThrowIfFailed(m_device->CreateBlendState(&bd, m_blendState.ReleaseAndGetAddressOf()));
 }
 
-void DX::DeviceResources::CreateRenderTargets_msaa() {
+void DeviceResources::CreateRenderTargets_msaa() {
 	m_depthStencil_msaa.Reset();
 	m_renderTarget_msaa.Reset();
 	m_DSV_msaa.Reset();

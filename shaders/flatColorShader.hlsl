@@ -1,5 +1,6 @@
 struct FRAG_INPUT {
     float4 position : SV_POSITION;
+    float4 color : TEXCOOD0;
 };
 
 cbuffer matrices : register(b0) {
@@ -10,18 +11,19 @@ cbuffer matrices : register(b0) {
 
 cbuffer shaderData : register(b0) {
     float worldScale;
-    float3 albedoColor;
+    float4 albedoColor;
 }
 
-FRAG_INPUT vertex(float3 position : POSITION) {
+FRAG_INPUT vertex(float3 position : POSITION, float4 vertexColor : COLOR) {
     FRAG_INPUT o;
 
     float4 posMV = mul(viewMat, mul(modelMat, float4(position, 1.0f)));
     o.position = mul(projectionMat, posMV);
+    o.color = vertexColor;
 
     return o;
 }
 
 float4 fragment(FRAG_INPUT i) : SV_TARGET {
-    return float4(albedoColor, 1.0f);
+    return i.color * albedoColor;
 }

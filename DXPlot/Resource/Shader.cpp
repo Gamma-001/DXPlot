@@ -1,10 +1,12 @@
-#include "Resource/Shader.hpp"
+#include <Resource/Shader.hpp>
 
 #include <DirectXMath.h>
 
+using namespace Cass;
+
 // ---------- class Shader
 
-DX::Shader::Shader(DirectX::XMFLOAT4 _color) : m_color(_color) {}
+Shader::Shader(DirectX::XMFLOAT4 _color) : m_color(_color) {}
 
 namespace {
 	// structs used for constant buffers must be a aligned to 16 bytes
@@ -35,7 +37,7 @@ namespace {
 	};
 }
 
-void DX::Shader::SetActive(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, UINT32 flags) {
+void Shader::SetActive(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, UINT32 flags) {
 	if (_pContext == nullptr) return;
 
 	SetBuffers(_pContext, camera, _modelMat, flags);
@@ -45,7 +47,12 @@ void DX::Shader::SetActive(ID3D11DeviceContext* _pContext, DX::Camera& camera, D
 	_pContext->PSSetShader(m_fragShader.Get(), nullptr, NULL);
 }
 
-HRESULT DX::Shader::CompileAndSetLayout(LPCWSTR fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext, D3D11_INPUT_ELEMENT_DESC* ied, UINT numElements) {
+void Shader::SetAlbedo(std::shared_ptr <Texture> _albedo) {
+	m_albedo.reset();
+	m_albedo = _albedo;
+}
+
+HRESULT Shader::CompileAndSetLayout(LPCWSTR fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext, D3D11_INPUT_ELEMENT_DESC* ied, UINT numElements) {
 	if (_pDevice == nullptr) return E_FAIL;
 
 	HRESULT hr = S_OK;
@@ -98,13 +105,13 @@ HRESULT DX::Shader::CompileAndSetLayout(LPCWSTR fName, ID3D11Device* _pDevice, I
 
 // ---------- class SurfaceShader
 
-DX::SurfaceShader::SurfaceShader(std::shared_ptr <DX::Texture> _albedo, DirectX::XMFLOAT4 _color) : Shader(_color) {
+SurfaceShader::SurfaceShader(std::shared_ptr <Texture> _albedo, DirectX::XMFLOAT4 _color) : Shader(_color) {
 	m_roughness = 0.5;
 	m_metallic = 0.0f;
 	m_albedo = _albedo;
 }
 
-HRESULT DX::SurfaceShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
+HRESULT SurfaceShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
 	HRESULT hr = S_OK;
 
 	// multiple datatypes can bind to a single slot of input layout, useful when the vertex buffer is a structure
@@ -139,7 +146,7 @@ HRESULT DX::SurfaceShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, 
 	return hr;
 }
 
-void DX::SurfaceShader::SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags) {
+void SurfaceShader::SetBuffers(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags) {
 	SURF_CBUFFERDATA_VS cb;
 	ZeroMemory(&cb, sizeof(cb));
 	cb.modelMat = _modelMat;
@@ -159,13 +166,13 @@ void DX::SurfaceShader::SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& c
 
 	D3D11_MAPPED_SUBRESOURCE ms1;
 	ZeroMemory(&ms1, sizeof(ms1));
-	DX::ThrowIfFailed(_pContext->Map(m_vsCbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &ms1));
+	ThrowIfFailed(_pContext->Map(m_vsCbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &ms1));
 	memcpy(ms1.pData, &cb, sizeof(cb));
 	_pContext->Unmap(m_vsCbuffer.Get(), 0);
 
 	D3D11_MAPPED_SUBRESOURCE ms2;
 	ZeroMemory(&ms2, sizeof(ms2));
-	DX::ThrowIfFailed(_pContext->Map(m_psCbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &ms2));
+	ThrowIfFailed(_pContext->Map(m_psCbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, NULL, &ms2));
 	memcpy(ms2.pData, &cb1, sizeof(cb1));
 	_pContext->Unmap(m_psCbuffer.Get(), 0);
 
@@ -182,9 +189,9 @@ void DX::SurfaceShader::SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& c
 
 // --------- class FlatShader
 
-DX::FlatShader::FlatShader(DirectX::XMFLOAT4 _color) :Shader(_color) {}
+FlatShader::FlatShader(DirectX::XMFLOAT4 _color) :Shader(_color) {}
 
-HRESULT DX::FlatShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
+HRESULT FlatShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
 	HRESULT hr = S_OK;
 
 	D3D11_INPUT_ELEMENT_DESC* ied = new D3D11_INPUT_ELEMENT_DESC[2]{
@@ -212,7 +219,7 @@ HRESULT DX::FlatShader::LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3
 	return hr;
 }
 
-void DX::FlatShader::SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags) {
+void FlatShader::SetBuffers(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags) {
 	FLAT_CBUFFERDATA_VS cb1;
 	ZeroMemory(&cb1, sizeof(cb1));
 	cb1.modelMat = _modelMat;

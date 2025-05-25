@@ -1,14 +1,14 @@
 #pragma once
 
-#include "util.hpp"
-#include "Object/Camera.hpp"
-#include "Resource/Texture.hpp"
+#include <util.hpp>
+#include <Object/Camera.hpp>
+#include <Resource/Texture.hpp>
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 
-namespace DX {
+namespace Cass {
 	enum SHADER_FLAGS: uint32_t {
 		SHADER_FLAGS_NONE = 0,
 		SHADER_FLAGS_FLAT_NO_PROJECT = 1
@@ -17,7 +17,10 @@ namespace DX {
 	class Shader {
 	public:
 		Shader(DirectX::XMFLOAT4 _color);
-		void SetActive(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, UINT32 flags = 0);
+
+		void SetActive(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, UINT32 flags = 0);
+
+		void SetAlbedo(std::shared_ptr <Texture> _albedo);
 
 		DirectX::XMFLOAT4 m_color;
 	
@@ -30,7 +33,7 @@ namespace DX {
 		/**
 		* @brief Set Constant Buffers for shader stages
 		*/
-		virtual void SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = 0) = 0;
+		virtual void SetBuffers(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = 0) = 0;
 		virtual HRESULT LoadFromFile(LPCWSTR fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) = 0;
 		
 		Microsoft::WRL::ComPtr <ID3D11VertexShader> m_vertShader;
@@ -39,6 +42,8 @@ namespace DX {
 
 		Microsoft::WRL::ComPtr <ID3D11Buffer> m_vsCbuffer;
 		Microsoft::WRL::ComPtr <ID3D11Buffer> m_psCbuffer;
+
+		std::shared_ptr <Texture> m_albedo;
 	};
 
 	class SurfaceShader : public Shader {
@@ -50,10 +55,7 @@ namespace DX {
 		float m_metallic;
 	
 	protected:
-		void SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = SHADER_FLAGS_NONE) override;
-	
-	private:
-		std::shared_ptr <Texture> m_albedo;
+		void SetBuffers(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = SHADER_FLAGS_NONE) override;
 	};
 
 	class FlatShader : public Shader {
@@ -62,6 +64,6 @@ namespace DX {
 		HRESULT LoadFromFile(LPCWSTR _fName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) override;
 	
 	protected:
-		void SetBuffers(ID3D11DeviceContext* _pContext, DX::Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = SHADER_FLAGS_NONE) override;
+		void SetBuffers(ID3D11DeviceContext* _pContext, Camera& camera, DirectX::XMMATRIX _modelMat, uint32_t flags = SHADER_FLAGS_NONE) override;
 	};
 }

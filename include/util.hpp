@@ -6,7 +6,7 @@
 #include <sstream>
 #include <DirectXMath.h>
 
-namespace DX {
+namespace Cass {
 	namespace Math {
 		constexpr float PI = 3.14159265f;
 		constexpr float PIx2 = 2.0f * PI;

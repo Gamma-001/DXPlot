@@ -1,9 +1,9 @@
-#include "util.hpp"
+#include <util.hpp>
 
 #include <cstdarg>
 #include <sstream>
 
-const char* DX::ComException::what() const {
+const char* Cass::ComException::what() const {
 	std::ostringstream ss;
 	ss << "Faliure, HRESULT : " << std::hex << result;
 	std::string str = ss.str();
@@ -11,7 +11,7 @@ const char* DX::ComException::what() const {
 }
 
 #if defined(_DEBUG) || defined(DEBUG)
-void DX::DebugLog(const char* fmt, ...) {
+void Cass::DebugLog(const char* fmt, ...) {
 	std::ostringstream ss;
 	va_list args;
 	va_start(args, fmt);
@@ -51,10 +51,10 @@ void DX::DebugLog(const char* fmt, ...) {
 	OutputDebugStringA(ss.str().c_str());
 }
 #else 
-void DX::DebugLog(const char* fmt, ...) { }
+void Cass::DebugLog(const char* fmt, ...) { }
 #endif
 
-RECT DX::GetAbsoluteClientRect(HWND hWnd) {
+RECT Cass::GetAbsoluteClientRect(HWND hWnd) {
 	RECT rc = { 0, 0, 0, 0 };
 	POINT temp;
 

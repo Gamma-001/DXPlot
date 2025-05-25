@@ -11,7 +11,7 @@
 
 #include <vector>
 
-namespace DX {
+namespace Cass {
 	class Texture {
 	public:
 		Texture(D3D11_FILTER _filtering, D3D11_TEXTURE_ADDRESS_MODE _addressMode, DirectX::XMFLOAT4 _borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }, size_t _width = 0, size_t _height = 0);
@@ -36,7 +36,7 @@ namespace DX {
 		* @brief Create a texture from supplied color data, each group of 4 elements must contain RGBA values respectively
 		*/
 		HRESULT LoadFromMemory(
-			uint32_t _width, uint32_t _height, std::vector<uint8_t> colorData, 
+			uint32_t _width, uint32_t _height, const std::vector<uint8_t> &colorData, 
 			ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext
 		);
 

@@ -1,10 +1,12 @@
-#include "Resource/Texture.hpp"
-#include "util.hpp"
+#include <Resource/Texture.hpp>
+#include <util.hpp>
 
 #include <combaseapi.h>
 #include <wincodec.h>
 
 #include <numeric>
+
+using namespace Cass;
 
 namespace {
 	struct WICTranslate {
@@ -120,9 +122,9 @@ namespace {
 // ---------- class Texture
 //
 
-Microsoft::WRL::ComPtr <IWICImagingFactory> DX::Texture::s_factory = NULL;
+Microsoft::WRL::ComPtr <IWICImagingFactory> Texture::s_factory = NULL;
 
-DX::Texture::Texture(D3D11_FILTER _filtering, D3D11_TEXTURE_ADDRESS_MODE _addressMode, DirectX::XMFLOAT4 _borderColor, size_t _width, size_t _height) {
+Texture::Texture(D3D11_FILTER _filtering, D3D11_TEXTURE_ADDRESS_MODE _addressMode, DirectX::XMFLOAT4 _borderColor, size_t _width, size_t _height) {
 	m_width = _width;
 	m_height = _height;
 	m_filtering = _filtering;
@@ -130,7 +132,7 @@ DX::Texture::Texture(D3D11_FILTER _filtering, D3D11_TEXTURE_ADDRESS_MODE _addres
 	m_borderColor = _borderColor;
 }
 
-DXGI_FORMAT DX::Texture::WICToDXGI(const GUID& guid) {
+DXGI_FORMAT Texture::WICToDXGI(const GUID& guid) {
 	for (SIZE_T i = 0; i < _countof(WICFormats); i++) {
 		if (memcmp(&WICFormats[i], &guid, sizeof(GUID)) == 0) {
 			return WICFormats[i].format;
@@ -140,7 +142,7 @@ DXGI_FORMAT DX::Texture::WICToDXGI(const GUID& guid) {
 	return DXGI_FORMAT_UNKNOWN;
 }
 
-SIZE_T DX::Texture::WICBitsPerPixel(const GUID& targetGuid) {
+SIZE_T Texture::WICBitsPerPixel(const GUID& targetGuid) {
 	if (!s_factory) return 0;
 
 	Microsoft::WRL::ComPtr <IWICComponentInfo> cInfo;
@@ -160,7 +162,7 @@ SIZE_T DX::Texture::WICBitsPerPixel(const GUID& targetGuid) {
 	return bpp;
 }
 
-HRESULT DX::Texture::CreateFromSolidColor(
+HRESULT Texture::CreateFromSolidColor(
 	uint32_t _width, uint32_t _height,
 	uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a,
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext
@@ -178,7 +180,7 @@ HRESULT DX::Texture::CreateFromSolidColor(
 	return LoadFromMemory(_width, _height, colorData, _pDevice, _pContext);
 }
 
-HRESULT DX::Texture::LoadFromFile(LPCWSTR _fileName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
+HRESULT Texture::LoadFromFile(LPCWSTR _fileName, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
 	HRESULT hr = S_OK;
 
 	// create the WIC factory if not initialized or invalid
@@ -210,8 +212,8 @@ HRESULT DX::Texture::LoadFromFile(LPCWSTR _fileName, ID3D11Device* _pDevice, ID3
 	return hr;
 }
 
-HRESULT DX::Texture::LoadFromMemory(
-	uint32_t _width, uint32_t _height, std::vector<uint8_t> colorData, 
+HRESULT Texture::LoadFromMemory(
+	uint32_t _width, uint32_t _height, const std::vector<uint8_t> &colorData, 
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext
 ) {
 	if (!_pDevice || !_pContext || colorData.size() < 4) return E_INVALIDARG;
@@ -285,7 +287,7 @@ HRESULT DX::Texture::LoadFromMemory(
 
 // Protected methods
 
-HRESULT DX::Texture::CreateTextureFromWIC(ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext, IWICBitmapFrameDecode* _pFrame) {
+HRESULT Texture::CreateTextureFromWIC(ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext, IWICBitmapFrameDecode* _pFrame) {
 	if (!_pContext || !_pFrame || !_pDevice) return E_INVALIDARG;
 
 	UINT width, height;

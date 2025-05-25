@@ -26,24 +26,34 @@
 #include <memory>
 
 namespace Application {
-	template <class T>
-	struct MeshObject {
-		MeshObject() : name(""), culling(true) {}
-		MeshObject(const std::string& _name) : name(_name), culling(true) {}
+	class Object {
+	public:
+		Object();
+		Object(const std::string& _name);
 
-		std::string name;
-		std::unique_ptr <T> pMesh;
-		std::shared_ptr <DX::Shader> pShader;
-		bool culling;
+		std::string m_name;
+
+	protected:
+		uint64_t m_id;
 	};
 
-	struct EmptyObject {
-		EmptyObject() : name("") {}
-		EmptyObject(const std::string& _name) : name(_name) {}
+	class MeshObject: public Object {
+	public:
+		MeshObject();
+		MeshObject(const std::string& _name);
 
-		std::string name;
-		std::unique_ptr <DX::Empty> pEmpty;
-		std::shared_ptr <DX::Shader> pShader;
+		bool culling;
+		std::unique_ptr <Cass::Mesh> pMesh;
+		std::shared_ptr <Cass::Shader> pShader;
+	};
+
+	class EmptyObject: public Object {
+	public:
+		EmptyObject();
+		EmptyObject(const std::string& _name);
+
+		std::unique_ptr <Cass::Empty> pEmpty;
+		std::shared_ptr <Cass::Shader> pShader;
 	};
 
 	// interface for window message / event handler
@@ -83,14 +93,11 @@ namespace Application {
 			RECT rc = m_resources.GetClientRect();
 			return rc.right - rc.left;
 		}
-		MeshObject<DX::Mesh>* GetMesh(size_t _index) const {
+		MeshObject* GetMesh(size_t _index) const {
 			if (_index >= 0 && _index < m_vec_mesh.size()) return m_vec_mesh[_index].get();
 			return nullptr;
 		}
-		MeshObject<DX::Plane>* GetPlane(size_t _index) const {
-			if (_index >= 0 && _index < m_vec_plane.size()) return m_vec_plane[_index].get();
-			return nullptr;
-		}
+
 
 		// state change and creation
 
@@ -98,41 +105,36 @@ namespace Application {
 		void Render(const float _clearColor[4], int _syncInterval, bool _msaa);
 		void ResizeContext(int _width, int _height);
 
-		// Object Creation and manipulation
+		// Resource Creation
 
-		void AddPolygon(const std::string &_name, float _radius = 1.0f , uint32_t _degree = 16, DX::SHADING _shading = DX::SHADING::FLAT, bool _culling = true);
-		void AddCuboid(const std::string& _name, float _width = 2.0f, float _height = 2.0f, float _depth = 2.0f, DX::SHADING _shading = DX::SHADING::FLAT, bool _culling = true);
-		void AddSphere(const std::string& _name, float _radius = 1.0f, uint32_t _resX = 32, uint32_t _resY = 16, DX::SHADING _shading = DX::SHADING::SMOOTH, bool _culling = true);
-		void AddPlane(const std::string& _name, float _width = 2.0f, float _length = 2.0f, uint32_t _resX = 32, uint32_t _resY = 32, DX::SHADING _shading = DX::SHADING::SMOOTH, bool _culling = false);
+		void AddPolygon(const std::string &_name, float _radius = 1.0f , uint32_t _degree = 16, Cass::SHADING _shading = Cass::SHADING::FLAT, bool _culling = true);
+		void AddCuboid(const std::string& _name, float _width = 2.0f, float _height = 2.0f, float _depth = 2.0f, Cass::SHADING _shading = Cass::SHADING::FLAT, bool _culling = true);
+		void AddSphere(const std::string& _name, float _radius = 1.0f, uint32_t _resX = 32, uint32_t _resY = 16, Cass::SHADING _shading = Cass::SHADING::SMOOTH, bool _culling = true);
+		void AddPlane(const std::string& _name, float _width = 2.0f, float _length = 2.0f, uint32_t _resX = 32, uint32_t _resY = 32, Cass::SHADING _shading = Cass::SHADING::SMOOTH, bool _culling = false);
 
-		/**
-		* Displace vertices on z axis defined by the a lambda or class with overloaded operator ()
-		* func should take two parameters: float x, float y
-		* func must return float
-		*/
-		template <class DisplaceFunc>
-		void DisplacePlane(size_t _index, DisplaceFunc _func, float _clamp, bool _center = false) {
-			if (_index >= 0 && _index < m_vec_plane.size()) {
-				m_vec_plane[_index].get()->pMesh->Displace(m_resources.GetDeviceContext(), _func, _clamp, _center);
-			}
-		}
+		void AddTexture(D3D11_FILTER _filter, D3D11_TEXTURE_ADDRESS_MODE _mode, LPCWSTR _filename);
+		void AddTexture(D3D11_FILTER _filter, D3D11_TEXTURE_ADDRESS_MODE _mode, uint32_t _width, uint32_t _height, const std::vector <uint8_t> &_colorData);
 
-		// Shader creation / selection
+		// Overlays
 
-		DX::Camera m_camera;
+		void ToggleBoundingBox(bool _value);
+
+		Cass::Camera m_camera;
 
 	private:
-		DX::DeviceResources m_resources;
-		std::vector <std::unique_ptr<MeshObject <DX::Mesh>>> m_vec_mesh;
-		std::vector <std::unique_ptr<MeshObject <DX::Plane>>> m_vec_plane;
+		Cass::DeviceResources m_resources;
+		std::vector <std::unique_ptr<MeshObject>> m_vec_mesh;
 		std::vector <std::unique_ptr<EmptyObject>> m_vec_empty;
+		std::vector <std::shared_ptr<Cass::Texture>> m_textures;
 		std::vector <EmptyObject> m_grid;
 		EmptyObject m_axis;
 
 		bool m_msaa;
 		bool m_showGrid;
 
-		static std::shared_ptr <DX::SurfaceShader> s_defSurf;
-		static std::shared_ptr <DX::FlatShader> s_defFlat;
+		static std::shared_ptr <Cass::SurfaceShader> s_defSurf;
+		static std::shared_ptr <Cass::FlatShader> s_defFlat;
 	};
 }
+
+// TODO Refine scene class, all meshes should be stored in a single vector

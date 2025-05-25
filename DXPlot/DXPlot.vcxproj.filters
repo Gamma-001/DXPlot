@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{fc568d50-5c0e-433d-915f-926c13a34781}</UniqueIdentifier>
     </Filter>
@@ -48,6 +44,25 @@
     </Filter>
     <Filter Include="Source Files\Device">
       <UniqueIdentifier>{556df595-5db2-4533-aa25-26ba201f8330}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Elements">
+      <UniqueIdentifier>{e57c5ec8-bc3f-4e9b-8228-e51c40902dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Elements">
+      <UniqueIdentifier>{bdb59f50-bc48-46dc-80f3-b78eb71e9ded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{f401b6fe-7e83-45dd-8ca3-f6791c8732a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Textures">
+      <UniqueIdentifier>{3c7b9dd1-9cda-419e-a030-a8e8101bf835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Models">
+      <UniqueIdentifier>{324f9d80-dc8c-4ad5-a860-e5a55712eeb4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -345,6 +360,12 @@
     <ClInclude Include="..\include\Engine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\Elements\BoundingBox.hpp">
+      <Filter>Header Files\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Elements\Ray.hpp">
+      <Filter>Header Files\Elements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXPlot.cpp">
@@ -407,6 +428,12 @@
     <ClCompile Include="Device\Mouse.cpp">
       <Filter>Source Files\Device</Filter>
     </ClCompile>
+    <ClCompile Include="Elements\Ray.cpp">
+      <Filter>Source Files\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="Elements\BoundingBox.cpp">
+      <Filter>Source Files\Elements</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\axisGridShader.hlsl">
@@ -445,10 +472,24 @@
     <None Include="..\include\extern\assimp\vector3.inl">
       <Filter>Header Files\extern\assimp</Filter>
     </None>
+    <None Include="..\assets\models\TRex.fbx">
+      <Filter>Assets\Models</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\shaders\flatColorShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\textures\leather_red_02_coll2_2k.jpg">
+      <Filter>Assets\Textures</Filter>
+    </Image>
+    <Image Include="..\assets\textures\rough_wood_Diff_2k.png">
+      <Filter>Assets\Textures</Filter>
+    </Image>
+    <Image Include="..\assets\textures\TexturesCom_SoilMud0004_1_seamless_S.jpg">
+      <Filter>Assets\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

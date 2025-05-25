@@ -1,6 +1,17 @@
 #include <DXPlot.hpp>
+#include <Transform.hpp>
+#include <Elements/Ray.hpp>
+#include <Plot3D.hpp>
+#include <Resource/Texture.hpp>
 
-Application::D3DScene g_scene;
+#include <chrono>
+
+/**
+* TODO: Visualize all bounding boxes and verify box ray collision
+* TODO: implement computer shaders
+*/
+
+static Application::D3DScene g_scene;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInst, _In_ LPWSTR cmdLine, _In_ int nCmdShow) {
 	Application::Window mainWindow;
@@ -17,20 +28,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInst, _In_ L
 	MainHandler handler;
 	mainWindow.SetHandler(static_cast <Application::EventHandler*> (&handler));
 
+	g_scene.AddTexture(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP, L"../assets/textures/rough_wood_Diff_2k.png");
+
 	g_scene.AddCuboid("Cube", 4.0f, 4.0f, 4.0f);
 	g_scene.AddPolygon("Disk", 2.0f);
 	g_scene.AddSphere("Sphere", 2.0f);
+	g_scene.AddPlane("plane", 4.0f, 4.0f, 16, 16, Cass::SHADING::SMOOTH);
+
 	g_scene.GetMesh(0)->pMesh->Translate({ 5.0f, 0.0f, 0.0f });
 	g_scene.GetMesh(1)->pMesh->Translate({ -5.0f, 0.0f, 0.0f });
 	g_scene.GetMesh(2)->pMesh->Translate({ 0.0f, 5.0f, 0.0f });
 
-	// plotting
-	g_scene.AddPlane("plane", 4.0f, 4.0f, 128, 128, DX::SHADING::SMOOTH);
-	g_scene.DisplacePlane(0,
-		[](float x, float y) {
-			return 0.2f * sin((pow(x, 2) + pow(y, 2)) * 3.0f);
-		}, 50.0f, true
-	);
+	g_scene.ToggleBoundingBox(true);
 
 	bool terminate = false;
 	float clearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -71,12 +80,12 @@ LRESULT MainHandler::OnSize(HWND _hWnd, WPARAM _wParam, LPARAM _lParam) {
 void HandleNavigation(HWND _hWnd) {
 	POINT mousePos;
 	if (!GetCursorPos(&mousePos)) return;
-	float diffX = static_cast <float> (DX::Mouse::posX - mousePos.x) / g_scene.GetWidth();
-	float diffY = static_cast <float> (DX::Mouse::posY - mousePos.y) / g_scene.GetHeight();
+	float diffX = static_cast <float> (Cass::Mouse::posX - mousePos.x) / g_scene.GetWidth();
+	float diffY = static_cast <float> (Cass::Mouse::posY - mousePos.y) / g_scene.GetHeight();
 
 	// wrap cursor movement around the screen for smooth navigation
-	RECT clientRect = DX::GetAbsoluteClientRect(_hWnd);
-	if (( DX::Mouse::pressedMB ) && 
+	RECT clientRect = Cass::GetAbsoluteClientRect(_hWnd);
+	if (( Cass::Mouse::pressedMB ) && 
 		( mousePos.x >= clientRect.right - 5 || mousePos.x <= clientRect.left + 5 || mousePos.y <= clientRect.top + 5 || mousePos.y >= clientRect.bottom - 5 )) {
 		if (mousePos.x >= clientRect.right - 5) {
 			SetCursorPos(clientRect.left, mousePos.y);
@@ -97,27 +106,27 @@ void HandleNavigation(HWND _hWnd) {
 	}
 
 	// translate view [Lshift + middle mouse button + drag]
-	else if (DX::Mouse::pressedMB && DX::Keyboard::controls.l_shift) {
-		g_scene.m_camera.TranslateTargetLocal(DX::AXIS::RIGHT, 5.0f * diffX / sqrt(g_scene.m_camera.GetScale().x));
-		g_scene.m_camera.TranslateTargetLocal(DX::AXIS::FRONT, -5.0f * diffY / sqrt(g_scene.m_camera.GetScale().x));
+	else if (Cass::Mouse::pressedMB && Cass::Keyboard::controls.l_shift) {
+		g_scene.m_camera.TranslateTargetLocal(Cass::AXIS::X, 5.0f * diffX / sqrt(g_scene.m_camera.GetScale().x));
+		g_scene.m_camera.TranslateTargetLocal(Cass::AXIS::Y, -5.0f * diffY / sqrt(g_scene.m_camera.GetScale().x));
 	}
 
 	// rotate view [middle mouse button + drag]
-	else if (DX::Mouse::pressedMB && !DX::Keyboard::controls.l_shift) {
+	else if (Cass::Mouse::pressedMB && !Cass::Keyboard::controls.l_shift) {
 		g_scene.m_camera.RotateXY(-diffY * 150.0f);
 		g_scene.m_camera.Rotate(DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f), 150.0f * diffX);
 	}
 
 	// scale view [scroll wheel]
-	if (DX::Mouse::wheelDelta != 0) {
+	if (Cass::Mouse::wheelDelta != 0) {
 		float scaleAmount = 1.0f;
-		if (DX::Mouse::wheelDelta > 0) scaleAmount = 1.0f + 0.2f * static_cast <float> (DX::Mouse::wheelDelta) / 120.0f;
-		else scaleAmount = scaleAmount = 1.0f / (1.0f - 0.2f * static_cast <float> (DX::Mouse::wheelDelta) / 120.0f);
+		if (Cass::Mouse::wheelDelta > 0) scaleAmount = 1.0f + 0.2f * static_cast <float> (Cass::Mouse::wheelDelta) / 120.0f;
+		else scaleAmount = scaleAmount = 1.0f / (1.0f - 0.2f * static_cast <float> (Cass::Mouse::wheelDelta) / 120.0f);
 		
 		g_scene.m_camera.Scale(scaleAmount);
-		DX::Mouse::wheelDelta = 0;
+		Cass::Mouse::wheelDelta = 0;
 	}
 
-	DX::Mouse::posX = mousePos.x;
-	DX::Mouse::posY = mousePos.y;
+	Cass::Mouse::posX = mousePos.x;
+	Cass::Mouse::posY = mousePos.y;
 }

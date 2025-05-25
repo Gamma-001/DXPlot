@@ -1,7 +1,6 @@
 #include <DXPlot.hpp>
 #include <Transform.hpp>
 #include <Elements/Ray.hpp>
-#include <Plot3D.hpp>
 #include <Resource/Texture.hpp>
 
 #include <chrono>

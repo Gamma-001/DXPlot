@@ -3,6 +3,8 @@
 
 #include <exception>
 
+using namespace Cass;
+
 ComputeShader::ComputeShader(LPCWSTR _fileName, LPCSTR _entryPoint, ID3D11Device*& _pDevice): fileName(_fileName), entryPoint(_entryPoint) {
 	if (!_pDevice || !entryPoint || !fileName)
 		throw std::invalid_argument("Inavlid arguments passed to contructor");
@@ -26,11 +28,11 @@ ComputeShader::ComputeShader(LPCWSTR _fileName, LPCSTR _entryPoint, ID3D11Device
 		}
 
 		if (shader) shader->Release();
-		DX::ThrowIfFailed(hr);
+		ThrowIfFailed(hr);
 	}
 
 	hr = _pDevice->CreateComputeShader(shader->GetBufferPointer(), shader->GetBufferSize(), nullptr, &m_computeShader);
-	DX::ThrowIfFailed(hr);
+	ThrowIfFailed(hr);
 }
 
 void ComputeShader::CreateSRVFromTexture(DXGI_FORMAT format, D3D11_SRV_DIMENSION dimension, ID3D11Device*& _pDevice, ID3D11Texture2D*& _pResource) {
@@ -39,7 +41,7 @@ void ComputeShader::CreateSRVFromTexture(DXGI_FORMAT format, D3D11_SRV_DIMENSION
 	srvd.Format = format;
 	srvd.ViewDimension = dimension;
 
-	DX::ThrowIfFailed(_pDevice->CreateShaderResourceView(_pResource, &srvd, &m_SRV));
+	ThrowIfFailed(_pDevice->CreateShaderResourceView(_pResource, &srvd, &m_SRV));
 }
 
 void ComputeShader::CreateUAVFromTexture(DXGI_FORMAT format, D3D11_UAV_DIMENSION dimension, ID3D11Device*& _pDevice, ID3D11Texture2D*& _pResource) {
@@ -48,7 +50,7 @@ void ComputeShader::CreateUAVFromTexture(DXGI_FORMAT format, D3D11_UAV_DIMENSION
 	uavd.Format = format;
 	uavd.ViewDimension = dimension;
 
-	DX::ThrowIfFailed(_pDevice->CreateUnorderedAccessView(_pResource, &uavd, &m_UAV));
+	ThrowIfFailed(_pDevice->CreateUnorderedAccessView(_pResource, &uavd, &m_UAV));
 }
 
 void ComputeShader::Execute(UINT groupCountX, UINT groupCountY, ID3D11DeviceContext*& _pContext) {

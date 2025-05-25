@@ -1,6 +1,10 @@
 #pragma once
 #pragma warning (disable: 26451)
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <Object/Mesh.hpp>
 #include <util.hpp>
 
@@ -10,36 +14,55 @@
 
 #include <cmath>
 #include <vector>
+#include <limits>
+#include <memory>
+
+using namespace Cass;
 
 //
 // ---------- class Mesh
 //
 
-DX::Mesh::Mesh(size_t _vertCount, size_t _polyCount, DX::SHADING _shading) {
+std::unique_ptr <FlatShader> Mesh::s_defShader = nullptr;
+
+Mesh::Mesh(size_t _vertCount, size_t _polyCount, SHADING _shading, ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext) {
 	m_shadingMode = _shading;
 	m_polyCount = _polyCount;
-	m_vertCount	= m_shadingMode == DX::SHADING::SMOOTH ? _vertCount : m_polyCount * 3;
+	m_vertCount	= m_shadingMode == SHADING::SMOOTH ? _vertCount : m_polyCount * 3;
+	m_device = _pDevice;
+	m_deviceContext = _pContext;
+
+	if (!s_defShader) {
+		s_defShader = std::make_unique<FlatShader>();
+		Cass::ThrowIfFailed(s_defShader->LoadFromFile(L"../shaders/flatColorShader.hlsl", m_device.Get(), m_deviceContext.Get()));
+	}
 }
 
-DX::Mesh::~Mesh() { }
+Mesh::~Mesh() {}
 
-void DX::Mesh::Render(DX::Camera& _camera, ID3D11DeviceContext* _pContext, DX::Shader& _shader) {
+void Mesh::Render(Camera& _camera, Cass::Shader& _shader) {
 	if (m_vertCount < 3 || m_polyCount < 1) return;
 	if (m_vBuffer.Get() == nullptr || m_iBuffer.Get() == nullptr) return;
 
 	UINT strides = sizeof(detail::MESH_VERTEX_DATA);
 	UINT offsets = 0;
 
-	_shader.SetActive(_pContext, _camera, m_transformation);
+	_shader.SetActive(m_deviceContext.Get(), _camera, m_transformation);
 
-	_pContext->IASetVertexBuffers(0, 1, m_vBuffer.GetAddressOf(), &strides, &offsets);
-	_pContext->IASetIndexBuffer(m_iBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	_pContext->DrawIndexed(m_polyCount * 3, 0, 0);
+	m_deviceContext->IASetVertexBuffers(0, 1, m_vBuffer.GetAddressOf(), &strides, &offsets);
+	m_deviceContext->IASetIndexBuffer(m_iBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_deviceContext->DrawIndexed(m_polyCount * 3, 0, 0);
+	
+	if (m_boundsMesh) {
+		m_boundsMesh->ResetTransform();
+		m_boundsMesh->Translate(Math::XMFloat3Add(m_bounds.GetPosition(), GetPosition()));
+		m_boundsMesh->Render(_camera, *s_defShader.get());
+	}
 }
 
-void DX::Mesh::SetShading(DirectX::XMFLOAT3* _pFaceNormals) {
-	if (m_shadingMode == DX::SHADING::FLAT) {
+void Mesh::SetShading(DirectX::XMFLOAT3* _pFaceNormals) {
+	if (m_shadingMode == SHADING::FLAT) {
 		std::unique_ptr <DirectX::XMFLOAT3[]> tempPos(new DirectX::XMFLOAT3[m_vertCount]);
 		std::unique_ptr <DirectX::XMFLOAT2[]> tempUV(new DirectX::XMFLOAT2[m_vertCount]);
 		std::unique_ptr <DirectX::XMFLOAT3[]> tempNorm(nullptr);
@@ -70,21 +93,38 @@ void DX::Mesh::SetShading(DirectX::XMFLOAT3* _pFaceNormals) {
 	}
 }
 
-void DX::Mesh::SetBuffers(ID3D11DeviceContext* _pContext) {
+void Mesh::SetBuffers() {
 	// copy vertex data into vertex buffer
 	D3D11_MAPPED_SUBRESOURCE ms;
-	DX::ThrowIfFailed(_pContext->Map(m_vBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms));
+	ThrowIfFailed(m_deviceContext->Map(m_vBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms));
 	memcpy(ms.pData, m_vertexData.get(), sizeof(detail::MESH_VERTEX_DATA) * m_vertCount);
-	_pContext->Unmap(m_vBuffer.Get(), NULL);
+	m_deviceContext->Unmap(m_vBuffer.Get(), NULL);
 
 	// copy index data into index buffer
 	ZeroMemory(&ms, sizeof(ms));
-	DX::ThrowIfFailed(_pContext->Map(m_iBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms));
+	ThrowIfFailed(m_deviceContext->Map(m_iBuffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms));
 	memcpy(ms.pData, m_indices.get(), sizeof(uint32_t) * m_polyCount * 3);
-	_pContext->Unmap(m_iBuffer.Get(), NULL);
+	m_deviceContext->Unmap(m_iBuffer.Get(), NULL);
+
+	// update bounding box
+	static float fMax = std::numeric_limits <float>::max();
+	static float fMin = std::numeric_limits <float>::min();
+
+	DirectX::XMFLOAT3 lb = { fMax, fMax, fMax }, ub = { fMin, fMin, fMin };
+	for (int i = 0; i < m_vertCount; i++) {
+		lb.x = std::min(lb.x, m_vertexData[i].position.x);
+		lb.y = std::min(lb.y, m_vertexData[i].position.y);
+		lb.z = std::min(lb.z, m_vertexData[i].position.z);
+
+		ub.x = std::max(ub.x, m_vertexData[i].position.x);
+		ub.y = std::max(ub.y, m_vertexData[i].position.y);
+		ub.z = std::max(ub.z, m_vertexData[i].position.z);
+	}
+	m_bounds.Calculate(lb, ub);
+	if (m_boundsMesh) m_boundsMesh->Recompute(m_bounds.GetDimensions());
 }
 
-void DX::Mesh::CreateBuffers(ID3D11Device* _pDevice) {
+void Mesh::CreateBuffers() {
 	assert(m_vertCount > 2);
 
 	// create the vertex buffer
@@ -96,7 +136,7 @@ void DX::Mesh::CreateBuffers(ID3D11Device* _pDevice) {
 	v_bdc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	v_bdc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	DX::ThrowIfFailed(_pDevice->CreateBuffer(&v_bdc, nullptr, m_vBuffer.ReleaseAndGetAddressOf()));
+	ThrowIfFailed(m_device->CreateBuffer(&v_bdc, nullptr, m_vBuffer.ReleaseAndGetAddressOf()));
 
 	// create the index buffer;
 	D3D11_BUFFER_DESC i_bdc;
@@ -107,18 +147,18 @@ void DX::Mesh::CreateBuffers(ID3D11Device* _pDevice) {
 	i_bdc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	i_bdc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	DX::ThrowIfFailed(_pDevice->CreateBuffer(&i_bdc, nullptr, m_iBuffer.ReleaseAndGetAddressOf()));
+	ThrowIfFailed(m_device->CreateBuffer(&i_bdc, nullptr, m_iBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DX::Mesh::CalculateNormalsFromFace(ID3D11DeviceContext* _pContext) {
+void Mesh::CalculateNormalsFromFace() {
 	if (m_polyCount < 1) return;
 
 	std::unique_ptr <DirectX::XMFLOAT3[]> faceNorm(new DirectX::XMFLOAT3[m_polyCount]);
 	for (size_t i = 0; i < m_polyCount * 3; i += 3) {
 		DirectX::XMFLOAT3 a, b;
 
-		a = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
-		b = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
+		a = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
+		b = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
 
 		DirectX::XMStoreFloat3(
 			&faceNorm[i / 3],
@@ -130,12 +170,60 @@ void DX::Mesh::CalculateNormalsFromFace(ID3D11DeviceContext* _pContext) {
 	}
 
 	SetShading(faceNorm.get());
-	SetBuffers(_pContext);
+	SetBuffers();
+}
+
+void Mesh::GetPositions(std::vector <DirectX::XMFLOAT3> &_oPos) const {
+	if (_oPos.size()) _oPos = std::vector <DirectX::XMFLOAT3>();
+	_oPos.reserve(m_vertCount);
+
+	for (int i = 0; i < m_vertCount; i++) {
+		_oPos.push_back(m_vertexData[i].position);
+	}
+}
+
+void Mesh::GetNormals(std::vector <DirectX::XMFLOAT3>& _oNorm) const {
+	if (_oNorm.size()) _oNorm = std::vector <DirectX::XMFLOAT3>();
+	_oNorm.reserve(m_vertCount);
+
+	for (int i = 0; i < m_vertCount; i++) {
+		_oNorm.push_back(m_vertexData[i].normal);
+	}
+}
+
+void Mesh::GetUVs(std::vector <DirectX::XMFLOAT2>& _oUV) const {
+	if (_oUV.size()) _oUV = std::vector <DirectX::XMFLOAT2>();
+	_oUV.reserve(m_vertCount);
+
+	for (int i = 0; i < m_vertCount; i++) {
+		_oUV.push_back(m_vertexData[i].uv);
+	}
+}
+
+void Mesh::SetPositions(const std::vector<DirectX::XMFLOAT3>& _position) {
+	if (!m_vertexData || !m_deviceContext || _position.size() != m_vertCount) return;
+
+	for (int i = 0; i < m_vertCount; i++) {
+		m_vertexData[i].position = _position[i];
+	}
+
+	SetBuffers();
+	CalculateNormalsFromFace();
+}
+
+void Mesh::ShowBounds(bool _toggle) {
+	if (_toggle) {
+		if (m_boundsMesh != nullptr) return;
+		m_boundsMesh = std::make_unique<Box>(m_bounds.GetDimensions(), DirectX::XMFLOAT4 { 1.0f, 0.5f, 0.25f, 1.0f }, m_device.Get(), m_deviceContext.Get());
+	}
+	else {
+		m_boundsMesh.reset();
+	}
 }
 
 // static methods
 
-void DX::Mesh::SetSplitNormals(_In_ size_t polyCount, _In_ uint32_t* indices, _In_ DirectX::XMFLOAT3* faceNormals, _Out_ std::unique_ptr <DirectX::XMFLOAT3[]>& normals) {
+void Mesh::SetSplitNormals(_In_ size_t polyCount, _In_ uint32_t* indices, _In_ DirectX::XMFLOAT3* faceNormals, _Out_ std::unique_ptr <DirectX::XMFLOAT3[]>& normals) {
 	if (!polyCount || !indices || !faceNormals) return;
 
 	normals = std::unique_ptr <DirectX::XMFLOAT3[]>(new DirectX::XMFLOAT3[static_cast <SIZE_T> (polyCount) * 3]);
@@ -148,30 +236,25 @@ void DX::Mesh::SetSplitNormals(_In_ size_t polyCount, _In_ uint32_t* indices, _I
 	}
 }
 
-void DX::Mesh::SetSmoothNormals(_In_ size_t polyCount, _In_ size_t vertCount, _In_ uint32_t* indices, _In_ DirectX::XMFLOAT3* faceNormals, _Out_ std::unique_ptr <DirectX::XMFLOAT3[]>& normals) {
+void Mesh::SetSmoothNormals(_In_ size_t polyCount, _In_ size_t vertCount, _In_ uint32_t* indices, _In_ DirectX::XMFLOAT3* faceNormals, _Out_ std::unique_ptr <DirectX::XMFLOAT3[]>& normals) {
 	if (!polyCount || !vertCount || !indices || !faceNormals) return;
 
 	normals.reset();
 	normals = std::unique_ptr <DirectX::XMFLOAT3[]>(new DirectX::XMFLOAT3[vertCount]);
-	std::vector <std::vector <uint32_t>> dict(vertCount, std::vector <uint32_t> {});
+	for (int i = 0; i < vertCount; i++) normals[i] = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-	// vertex to face mapping
-	for (size_t i = 0; i < polyCount * 3; i += 3) {
-		dict[indices[i]].push_back(i / 3);
-		dict[indices[i + 1]].push_back(i / 3);
-		dict[indices[i + 2]].push_back(i / 3);
+	size_t vIndex;
+	for (size_t i = 0; i < polyCount; i ++) {
+		normals[indices[i * 3]] = Math::XMFloat3Add(normals[indices[i * 3]], faceNormals[i]);
+		normals[indices[i * 3 + 1]] = Math::XMFloat3Add(normals[indices[i * 3 + 1]], faceNormals[i]);
+		normals[indices[i * 3 + 2]] = Math::XMFloat3Add(normals[indices[i * 3 + 2]], faceNormals[i]);
 	}
 
-	// set vertex normals to the normalized sum of connected face normals
 	for (size_t i = 0; i < vertCount; i++) {
-		DirectX::XMFLOAT3 res = { 0, 0, 0 };
-		for (auto& x : dict[i]) {
-			res = DX::Math::XMFloat3Add(res, faceNormals[x]);
-		}
 		DirectX::XMStoreFloat3(
-			&(normals[i]),
+			&normals[i],
 			DirectX::XMVector3Normalize(
-				DirectX::XMLoadFloat3(&res)
+				DirectX::XMLoadFloat3(&normals[i])
 			)
 		);
 	}
@@ -181,26 +264,26 @@ void DX::Mesh::SetSmoothNormals(_In_ size_t polyCount, _In_ size_t vertCount, _I
 // ---------- class RegularPolygon
 //
 
-DX::RegularPolygon::RegularPolygon(
+RegularPolygon::RegularPolygon(
 	float _radius, uint32_t _degree, 
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext, 
-	DX::SHADING _shading) : Mesh(static_cast <size_t> (_degree) + 1, _degree, _shading) {
+	SHADING _shading) : Mesh(static_cast <size_t> (_degree) + 1, _degree, _shading, _pDevice, _pContext) {
 
 	m_degree = _degree;
 	m_radius = _radius;
 
 	if (_degree < 3) return;
 
-	CreateBuffers(_pDevice);
-	InitVertices(_pContext);
+	CreateBuffers();
+	InitVertices();
 }
 
-void DX::RegularPolygon::InitVertices(ID3D11DeviceContext* _pContext) {
+void RegularPolygon::InitVertices() {
 	m_vertexData = std::unique_ptr <detail::MESH_VERTEX_DATA[]> (new detail::MESH_VERTEX_DATA[m_vertCount]);
 	m_indices = std::unique_ptr <uint32_t[]> (new uint32_t[m_polyCount * 3]);
 
-	float theta = 2.0f * DX::Math::PI;
-	float offset = 2.0f * DX::Math::PI / m_degree;
+	float theta = 2.0f * Math::PI;
+	float offset = 2.0f * Math::PI / m_degree;
 
 	m_vertexData[0].position = { 0.0f, 0.0f, 0.0f };
 	m_vertexData[0].uv = { 0.5f, 0.5f };
@@ -227,27 +310,27 @@ void DX::RegularPolygon::InitVertices(ID3D11DeviceContext* _pContext) {
 	}
 
 	SetShading(faceNorm.get());
-	SetBuffers(_pContext);
+	SetBuffers();
 }
 
 //
 // ---------- class Cuboid
 //
 
-DX::Cuboid::Cuboid(
+Cuboid::Cuboid(
 	float _width, float _height, float _depth, 
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext,
-	DX::SHADING _shading) : Mesh(8U, 12U, _shading) {
+	SHADING _shading) : Mesh(8U, 12U, _shading, _pDevice, _pContext) {
 
 	m_width = _width;
 	m_height = _height;
 	m_depth = _depth;
 
-	CreateBuffers(_pDevice);
-	InitVertices(_pContext);
+	CreateBuffers();
+	InitVertices();
 }
 
-void DX::Cuboid::InitVertices(ID3D11DeviceContext* _pContext) {
+void Cuboid::InitVertices() {
 	m_vertexData = std::unique_ptr <detail::MESH_VERTEX_DATA[]> (new detail::MESH_VERTEX_DATA[m_vertCount]);
 	m_indices = std::unique_ptr <uint32_t[]> (new uint32_t[m_polyCount * 3]);
 
@@ -296,8 +379,8 @@ void DX::Cuboid::InitVertices(ID3D11DeviceContext* _pContext) {
 	for (size_t i = 0; i < m_polyCount * 3; i += 3) {
 		DirectX::XMFLOAT3 a, b;
 
-		a = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
-		b = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
+		a = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
+		b = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
 
 		DirectX::XMStoreFloat3(
 			&faceNorm[i / 3],
@@ -311,7 +394,7 @@ void DX::Cuboid::InitVertices(ID3D11DeviceContext* _pContext) {
 	SetShading(faceNorm.get());
 
 	// manually set UV coordinates for now, replace this to use LSCM or ABF++ later
-	if (m_shadingMode == DX::SHADING::FLAT) {
+	if (m_shadingMode == SHADING::FLAT) {
 		m_vertexData[12].uv = { 0.0f, 0.0f }; m_vertexData[13].uv = { 1.0f, 0.0f }; m_vertexData[14].uv = { 0.0f, 1.0f };
 		m_vertexData[15].uv = { 1.0f, 0.0f }; m_vertexData[16].uv = { 1.0f, 1.0f }; m_vertexData[17].uv = { 0.0f, 1.0f };
 		m_vertexData[18].uv = { 0.0f, 0.0f }; m_vertexData[19].uv = { 1.0f, 0.0f }; m_vertexData[20].uv = { 1.0f, 1.0f };
@@ -322,37 +405,36 @@ void DX::Cuboid::InitVertices(ID3D11DeviceContext* _pContext) {
 		m_vertexData[33].uv = { 0.0f, 1.0f }; m_vertexData[34].uv = { 0.0f, 0.0f }; m_vertexData[35].uv = { 1.0f, 0.0f };
 	}
 
-	SetBuffers(_pContext);
+	SetBuffers();
 }
 
 //
 // ---------- class Sphere
 //
 
-DX::Sphere::Sphere(
+Sphere::Sphere(
 	float _radius, uint32_t _resX, uint32_t _resY,
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext,
-	DX::SHADING _shading) : Mesh(
+	SHADING _shading) : Mesh(
 		static_cast <size_t> (_resX) * (std::max(_resY, 2U) - 1U) + 2U,
 		static_cast <size_t> (_resX) * (static_cast <size_t> ((std::max(_resY, 2U) - 2U)) * 2U + 2U),
-		_shading) {
+		_shading, _pDevice, _pContext
+	) {
 	
 	m_radius = _radius;
-	m_resX = _resX;
+	m_resX = std::max(_resX, 2U);
 	m_resY = std::max(_resY, 2U);
 
-	if (m_resX < 3 || m_resY < 3) return;
-
-	CreateBuffers(_pDevice);
-	InitVertices(_pContext);
+	CreateBuffers();
+	InitVertices();
 }
 
-void DX::Sphere::InitVertices(ID3D11DeviceContext* _pContext) {
+void Sphere::InitVertices() {
 	m_vertexData = std::unique_ptr <detail::MESH_VERTEX_DATA[]> (new detail::MESH_VERTEX_DATA[m_vertCount]);
 	m_indices = std::unique_ptr <uint32_t[]> (new uint32_t[m_polyCount * 3]);
 
-	float theta = DX::Math::PI, phi;
-	float incrY = -DX::Math::PI / m_resY, incrX = -DX::Math::PIx2 / m_resX;
+	float theta = Math::PI, phi;
+	float incrY = -Math::PI / m_resY, incrX = -Math::PIx2 / m_resX;
 
 	m_vertexData[0].position = { 0.0f, 0.0f, -m_radius };
 	m_vertexData[0].normal = { 0.0f, 0.0f, -1.0f };
@@ -362,7 +444,7 @@ void DX::Sphere::InitVertices(ID3D11DeviceContext* _pContext) {
 
 	int index = 1;
 	for (size_t i = 0; i < m_resY - 1U; i++) {
-		phi = DX::Math::PIx2;
+		phi = Math::PIx2;
 		for (size_t j = 0; j < m_resX; j++) {
 			m_vertexData[index].position = {
 				m_radius * sin(theta) * cos(phi),
@@ -426,8 +508,8 @@ void DX::Sphere::InitVertices(ID3D11DeviceContext* _pContext) {
 	for (size_t i = 0; i < m_polyCount * 3; i += 3) {
 		DirectX::XMFLOAT3 a, b;
 
-		a = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
-		b = DX::Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
+		a = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 1]].position, m_vertexData[m_indices[i]].position);
+		b = Math::XMFloat3Subtract(m_vertexData[m_indices[i + 2]].position, m_vertexData[m_indices[i]].position);
 
 		DirectX::XMStoreFloat3(
 			&faceNorm[i / 3],
@@ -440,34 +522,34 @@ void DX::Sphere::InitVertices(ID3D11DeviceContext* _pContext) {
 
 	for (size_t i = 0; i < m_vertCount; i++) {
 		m_vertexData[i].uv = {
-			0.5f + atan2(m_vertexData[i].position.y, m_vertexData[i].position.x) / DX::Math::PIx2,
-			0.5f + asin(m_vertexData[i].position.z) / DX::Math::PI
+			0.5f + atan2(m_vertexData[i].position.y, m_vertexData[i].position.x) / Math::PIx2,
+			0.5f + asin(m_vertexData[i].position.z) / Math::PI
 		};
 	}
 
 	SetShading(faceNorm.get());
-	SetBuffers(_pContext);
+	SetBuffers();
 }
 
 //
 // ---------- class Plane
 //
 
-DX::Plane::Plane(
+Plane::Plane(
 	float _width, float _length, uint32_t _resX, uint32_t _resY,
 	ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext,
-	DX::SHADING _shading
-) : Mesh((_resX + 2U) * (_resY + 2U), 2U * (_resX + 1U) * (_resY + 1U), _shading) {
+	SHADING _shading
+) : Mesh((_resX + 2U) * (_resY + 2U), 2U * (_resX + 1U) * (_resY + 1U), _shading, _pDevice, _pContext) {
 	m_width = _width;
 	m_length = _length;
 	m_resX = _resX;
 	m_resY = _resY;
 
-	CreateBuffers(_pDevice);
-	InitVertices(_pContext);
+	CreateBuffers();
+	InitVertices();
 }
 
-void DX::Plane::InitVertices(ID3D11DeviceContext* _pContext) {
+void Plane::InitVertices() {
 	m_vertexData = std::unique_ptr <detail::MESH_VERTEX_DATA[]>(new detail::MESH_VERTEX_DATA[m_vertCount]);
 	m_indices = std::unique_ptr <uint32_t[]>(new uint32_t[m_polyCount * 3]);
 
@@ -518,16 +600,16 @@ void DX::Plane::InitVertices(ID3D11DeviceContext* _pContext) {
 	}
 
 	SetShading(faceNorm.get());
-	SetBuffers(_pContext);
+	SetBuffers();
 }
 
 //
 // ---------- class CustomMesh
 //
 
-DX::CustomMesh::CustomMesh():Mesh(0, 0, DX::SHADING::FLAT) { }
+CustomMesh::CustomMesh(ID3D11Device* _pDevice, ID3D11DeviceContext* _pContext):Mesh(0, 0, SHADING::FLAT, _pDevice, _pContext) { }
 
-HRESULT DX::CustomMesh::LoadFromFile(_In_ std::string _fName, _In_ ID3D11Device* _pDevice, _In_ ID3D11DeviceContext* _pContext, _Out_opt_ char* _log) {
+HRESULT CustomMesh::LoadFromFile(_In_ std::string _fName, _In_ ID3D11Device* _pDevice, _In_ ID3D11DeviceContext* _pContext, _Out_opt_ char* _log) {
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(_fName,
@@ -538,7 +620,7 @@ HRESULT DX::CustomMesh::LoadFromFile(_In_ std::string _fName, _In_ ID3D11Device*
 	if (scene == nullptr) {
 		if (_log) {
 			const char* errLog = importer.GetErrorString();
-			size_t errLen = 0;
+			size_t errLen = 1;
 			for (; *(errLog + errLen) != '\0'; errLen++);
 			memcpy(_log, errLog, errLen * sizeof (char));
 		}
@@ -555,7 +637,7 @@ HRESULT DX::CustomMesh::LoadFromFile(_In_ std::string _fName, _In_ ID3D11Device*
 	m_vertCount = mesh->mNumVertices;
 	m_polyCount = mesh->mNumFaces;
 
-	CreateBuffers(_pDevice);
+	CreateBuffers();
 
 	if (m_vertCount < 3 || m_polyCount < 1) {
 		if (_log) {
@@ -581,9 +663,9 @@ HRESULT DX::CustomMesh::LoadFromFile(_In_ std::string _fName, _In_ ID3D11Device*
 		m_indices[i * 3 + 2] = faces[i].mIndices[2];
 	}
 
-	SetBuffers(_pContext);
+	SetBuffers();
 
 	return S_OK;
 }
 
-void DX::CustomMesh::InitVertices(ID3D11DeviceContext* _pContext) {  }
+void CustomMesh::InitVertices() {  }

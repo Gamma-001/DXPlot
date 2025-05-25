@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-namespace DX {
+namespace Cass {
 	class Mouse {
 	public:
 		static long posX, posY;

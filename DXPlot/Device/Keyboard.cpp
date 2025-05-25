@@ -1,3 +1,5 @@
 #include <Device/Keyboard.hpp>
 
-DX::ControlKeys DX::Keyboard::controls = DX::ControlKeys();
+using namespace Cass;
+
+ControlKeys Keyboard::controls = ControlKeys();

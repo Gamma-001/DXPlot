@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DX {
+namespace Cass {
 	class ControlKeys {
 	public:
 		bool l_ctrl, r_ctrl, l_shift, r_shift, tab, l_alt, r_alt;

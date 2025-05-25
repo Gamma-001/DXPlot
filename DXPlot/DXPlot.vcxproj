@@ -22,6 +22,8 @@
     <ClInclude Include="..\include\Device\Keyboard.hpp" />
     <ClInclude Include="..\include\Device\Mouse.hpp" />
     <ClInclude Include="..\include\DXPlot.hpp" />
+    <ClInclude Include="..\include\Elements\BoundingBox.hpp" />
+    <ClInclude Include="..\include\Elements\Ray.hpp" />
     <ClInclude Include="..\include\Engine.hpp" />
     <ClInclude Include="..\include\extern\assimp\aabb.h" />
     <ClInclude Include="..\include\extern\assimp\ai_assert.h" />
@@ -122,6 +124,8 @@
     <ClCompile Include="Device\Keyboard.cpp" />
     <ClCompile Include="Device\Mouse.cpp" />
     <ClCompile Include="DXPlot.cpp" />
+    <ClCompile Include="Elements\BoundingBox.cpp" />
+    <ClCompile Include="Elements\Ray.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="extern\imgui\imgui.cpp" />
     <ClCompile Include="extern\imgui\imgui_demo.cpp" />
@@ -141,6 +145,7 @@
     <ClCompile Include="util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\assets\models\TRex.fbx" />
     <None Include="..\include\extern\assimp\.editorconfig" />
     <None Include="..\include\extern\assimp\color4.inl" />
     <None Include="..\include\extern\assimp\config.h.in" />
@@ -170,38 +175,43 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\assets\textures\leather_red_02_coll2_2k.jpg" />
+    <Image Include="..\assets\textures\rough_wood_Diff_2k.png" />
+    <Image Include="..\assets\textures\TexturesCom_SoilMud0004_1_seamless_S.jpg" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{66d688ed-9379-47e9-90cb-58dbfb088101}</ProjectGuid>
     <RootNamespace>DX111</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
     <ProjectName>DXPlot</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -275,6 +285,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <OpenMPSupport>false</OpenMPSupport>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

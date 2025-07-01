@@ -64,6 +64,12 @@
     <Filter Include="Assets\Models">
       <UniqueIdentifier>{324f9d80-dc8c-4ad5-a860-e5a55712eeb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{1dbe7348-be07-40bf-bf25-5e016048eb6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{5eb3e124-e8e9-4db7-a5fe-964f9fe4447c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\DXPlot.hpp">
@@ -366,6 +372,9 @@
     <ClInclude Include="..\include\Elements\Ray.hpp">
       <Filter>Header Files\Elements</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GUI\Window.hpp">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXPlot.cpp">
@@ -433,6 +442,9 @@
     </ClCompile>
     <ClCompile Include="Elements\BoundingBox.cpp">
       <Filter>Source Files\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Window.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

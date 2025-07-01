@@ -1,19 +1,23 @@
 #include <DXPlot.hpp>
+
 #include <Transform.hpp>
 #include <Elements/Ray.hpp>
+#include <GUI/Window.hpp>
 #include <Resource/Texture.hpp>
+#include <Device/Mouse.hpp>
+#include <Device/Keyboard.hpp>
 
 #include <chrono>
 
 /**
-* TODO: Visualize all bounding boxes and verify box ray collision
-* TODO: implement computer shaders
+* TODO: Verify box ray collision and implement basic GUI for adjusting object parameter
+* TODO: implement computer shaders, investigate if its possible to use that for custom fragment displacement
 */
 
 static Application::D3DScene g_scene;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInst, _In_ LPWSTR cmdLine, _In_ int nCmdShow) {
-	Application::Window mainWindow;
+	Cass::Window mainWindow;
 
 	if (!mainWindow.Initialize(hInst, L"DXPlot")) {
 		OutputDebugString(L"::ERROR::\tFailed to create a window\n");
@@ -25,7 +29,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE hPrevInst, _In_ L
 	ShowWindow(hWnd, nCmdShow);
 
 	MainHandler handler;
-	mainWindow.SetHandler(static_cast <Application::EventHandler*> (&handler));
+	mainWindow.SetHandler(static_cast <Cass::WndEventHandler*> (&handler));
 
 	g_scene.AddTexture(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP, L"../assets/textures/rough_wood_Diff_2k.png");
 

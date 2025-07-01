@@ -4,24 +4,13 @@
 #define NOMINMAX
 #endif
 
+#include <GUI/Window.hpp>
 #include <Resource/DeviceResources.hpp>
 #include <Resource/Shader.hpp>
 #include <Resource/Texture.hpp>
 #include <Object/Mesh.hpp>
 #include <Object/Empty.hpp>
-#include <Device/Keyboard.hpp>
-#include <Device/Mouse.hpp>
-#include <util.hpp>
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_win32.h>
-#include <imgui/imgui_impl_dx11.h>
-
-#include <DirectXMath.h>
-#include <windows.h>
-#include <windowsx.h>
-#include <d3d11.h>
-#include <utility>
 #include <vector>
 #include <memory>
 
@@ -56,28 +45,6 @@ namespace Application {
 		std::shared_ptr <Cass::Shader> pShader;
 	};
 
-	// interface for window message / event handler
-	class EventHandler {
-	public:
-		virtual LRESULT OnSize(HWND _hWnd, WPARAM _wParam, LPARAM _lParam) = 0;
-	};
-
-	// wrapper class for window handling
-	class Window {
-	public:
-		static bool Initialize(HINSTANCE hInst, LPCWSTR title, int width = 800, int height = 800);
-		static bool SetHandler(EventHandler* handler);
-		static void Destroy(HINSTANCE hInst);
-
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-		HWND GetHandle()						const	{ return s_hWnd; }
-		std::pair <int, int> GetDimensions()	const	{ return s_dimensions; }
-
-	private:
-		static HWND s_hWnd;
-		static std::pair <int, int> s_dimensions;
-	};
 
 	class D3DScene {
 	public:
@@ -101,7 +68,7 @@ namespace Application {
 
 		// state change and creation
 
-		void CreateD3DViewport(Window _window, D3D_FEATURE_LEVEL _minFeatureLevel = D3D_FEATURE_LEVEL_11_0, bool _msaa = true);
+		void CreateD3DViewport(Cass::Window _window, D3D_FEATURE_LEVEL _minFeatureLevel = D3D_FEATURE_LEVEL_11_0, bool _msaa = true);
 		void Render(const float _clearColor[4], int _syncInterval, bool _msaa);
 		void ResizeContext(int _width, int _height);
 
